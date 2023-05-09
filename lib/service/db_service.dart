@@ -91,6 +91,19 @@ class Database {
         .get();
   }
 
+  searchGrp(String grpName) async {
+    return FirebaseFirestore.instance.collection("groups")
+        .where('groupName', isGreaterThanOrEqualTo: grpName)
+        .where('groupName', isLessThanOrEqualTo: '$grpName\uf8ff')
+        .get()
+        .then((QuerySnapshot snapshot) {
+      List<DocumentSnapshot> documents = snapshot.docs;
+      List<DocumentSnapshot> filteredDocs = documents.where((doc) => doc['groupName'].contains(grpName)).toList();
+      return filteredDocs;
+    });
+  }
+
+// to be deleted
   Future<bool> isUserJoined(
       String groupName, String groupId, String userName) async {
     DocumentReference docRef = users.doc(uid);
