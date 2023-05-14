@@ -4,14 +4,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class SearchPage extends StatefulWidget {
-  const SearchPage({super.key});
+class SearchPersonPage extends StatefulWidget {
+  const SearchPersonPage({super.key});
 
   @override
-  State<SearchPage> createState() => _SearchPageState();
+  State<SearchPersonPage> createState() => _SearchPersonPageState();
 }
 
-class _SearchPageState extends State<SearchPage> {
+class _SearchPersonPageState extends State<SearchPersonPage> {
   TextEditingController searchController = TextEditingController();
   bool _isLoading = false;
   // QuerySnapshot? searchSnapshot;
@@ -45,9 +45,14 @@ class _SearchPageState extends State<SearchPage> {
     var showResults = [];
     if (searchController.text != "") {
       for (var clientSnapshot in _allResults) {
-        var groupName = clientSnapshot['groupName'].toString().toLowerCase();
+        var name = clientSnapshot['name'].toString().toLowerCase();
+        var email = clientSnapshot['email']
+            .toString()
+            .toLowerCase()
+            .substring(0, clientSnapshot['email'].toString().indexOf("@"));
 
-        if (groupName.contains(searchController.text.toLowerCase())) {
+        if (name.contains(searchController.text.toLowerCase()) ||
+            email.contains(searchController.text.toLowerCase())) {
           showResults.add(clientSnapshot);
         }
       }
@@ -64,7 +69,7 @@ class _SearchPageState extends State<SearchPage> {
     setState(() {
       _isLoading = true;
     });
-    await Database().groups.get().then((value) => setState(() {
+    await Database().users.get().then((value) => setState(() {
           _isLoading = false;
           _allResults = value.docs;
         }));
@@ -113,11 +118,10 @@ class _SearchPageState extends State<SearchPage> {
                 color: Colors.teal,
               ),
             )
-          : groupList(),
+          : peopleList(),
     );
   }
 
-  // not needed but retain for future reference
   initiateSearch() async {
     if (searchController.text.isNotEmpty) {
       setState(() {
@@ -125,7 +129,7 @@ class _SearchPageState extends State<SearchPage> {
       });
 
       await Database(uid: user.uid)
-          .searchGroup(searchController.text)
+          .searchUsers(searchController.text)
           .then((snapshot) {
         setState(() {
           // searchSnapshot = snapshot;
@@ -136,27 +140,27 @@ class _SearchPageState extends State<SearchPage> {
     }
   }
 
-  groupList() {
+  peopleList() {
     return _searchStarted
         ? ListView.builder(
             shrinkWrap: true,
             itemCount: _resultList.length,
             itemBuilder: (context, index) {
-              return groupTile(
+              return peopleTile(
                 userName,
-                _resultList[index]['groupId'],
-                _resultList[index]['groupName'],
-                HelperFunctions.getName(_resultList[index]['admin']),
-                _resultList[index]['members'],
+                _resultList[index]['uid'],
+                _resultList[index]['name'],
+                _resultList[index]['email'],
+                _resultList[index]['conversations'],
               );
             },
           )
         : Container();
   }
 
-  Widget groupTile(String userName, String groupId, String groupName,
-      String admin, List<dynamic> members) {
-    bool isJoined = members.contains("${user.uid}_$userName");
+  Widget peopleTile(String userName, String personId, String name, String email,
+      List<dynamic> convo) {
+    bool isJoined = convo.contains("${user.uid}_$userName");
 
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -164,15 +168,15 @@ class _SearchPageState extends State<SearchPage> {
         radius: 30,
         backgroundColor: Colors.teal[700],
         child: Text(
-          groupName.substring(0, 1).toUpperCase(),
+          name.substring(0, 1).toUpperCase(),
           style: const TextStyle(color: Colors.white),
         ),
       ),
       title: Text(
-        groupName,
+        name,
         style: const TextStyle(fontWeight: FontWeight.bold),
       ),
-      subtitle: Text("Admin: ${HelperFunctions.getName(admin)}"),
+      subtitle: Text("Email: $email"),
       trailing: StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return InkWell(
@@ -193,7 +197,7 @@ class _SearchPageState extends State<SearchPage> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 20, vertical: 10),
                     child: const Text(
-                      "Joined",
+                      "View Chat",
                       style: TextStyle(color: Colors.white),
                     ),
                   )
@@ -206,7 +210,7 @@ class _SearchPageState extends State<SearchPage> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 20, vertical: 10),
                     child: const Text(
-                      "Join Now",
+                      "Chat Now",
                       style: TextStyle(color: Colors.white),
                     ),
                   ),

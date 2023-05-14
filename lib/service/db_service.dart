@@ -16,6 +16,7 @@ class Database {
       "name": name,
       "email": email,
       "groups": [],
+      "conversations": [],
       "profilepic": "",
       "uid": uid
     });
@@ -27,9 +28,17 @@ class Database {
     return snapshot;
   }
 
-  // getting groups of a user
-  getUserGroups() async {
+  // getting data of a user
+  getUserData() async {
     return users.doc(uid).snapshots();
+  }
+
+  // getting conversations
+  getUserConversations() async {
+    CollectionReference conversations =
+        users.doc(uid).collection("conversations");
+
+    return conversations;
   }
 
   // create group
@@ -91,6 +100,31 @@ class Database {
         .get();
   }
 
+  searchUsers(String name) async {
+    return users
+        .where('name', isGreaterThanOrEqualTo: name)
+        .where('name', isLessThanOrEqualTo: '$name\uf8ff')
+        .where('email', isGreaterThanOrEqualTo: name)
+        .where('email', isLessThanOrEqualTo: '$name\uf8ff')
+        .get();
+  }
+
+// not needed but retain for future reference
+  searchGrp(String grpName) async {
+    return FirebaseFirestore.instance
+        .collection("groups")
+        .where('groupName', isGreaterThanOrEqualTo: grpName)
+        .where('groupName', isLessThanOrEqualTo: '$grpName\uf8ff')
+        .get()
+        .then((QuerySnapshot snapshot) {
+      List<DocumentSnapshot> documents = snapshot.docs;
+      List<DocumentSnapshot> filteredDocs =
+          documents.where((doc) => doc['groupName'].contains(grpName)).toList();
+      return filteredDocs;
+    });
+  }
+
+// not needed but retain for future reference
   Future<bool> isUserJoined(
       String groupName, String groupId, String userName) async {
     DocumentReference docRef = users.doc(uid);

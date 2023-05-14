@@ -23,7 +23,12 @@ class _GroupTileState extends State<GroupTile> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        nextScreen(context, ChatPage(groupId: widget.groupId, groupName: widget.groupName, userName: widget.username));
+        nextScreen(
+            context,
+            ChatPage(
+                groupId: widget.groupId,
+                groupName: widget.groupName,
+                userName: widget.username));
       },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
@@ -35,7 +40,9 @@ class _GroupTileState extends State<GroupTile> {
               widget.groupName.substring(0, 1).toUpperCase(),
               textAlign: TextAlign.center,
               style: const TextStyle(
-                  color: Colors.white, fontWeight: FontWeight.w400),
+                color: Colors.white,
+                fontWeight: FontWeight.w400,
+              ),
             ),
           ),
           title: Text(

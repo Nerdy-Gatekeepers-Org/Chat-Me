@@ -1,5 +1,6 @@
 import 'package:chatapp_firebase/helper/helper_function.dart';
 import 'package:chatapp_firebase/pages/auth/login_page.dart';
+import 'package:chatapp_firebase/pages/people_page.dart';
 import 'package:chatapp_firebase/pages/profile_page.dart';
 import 'package:chatapp_firebase/pages/search_page.dart';
 import 'package:chatapp_firebase/service/auth_service.dart';
@@ -47,7 +48,7 @@ class _HomePageState extends State<HomePage> {
 
     // getting snapshots in stream
     await Database(uid: FirebaseAuth.instance.currentUser!.uid)
-        .getUserGroups()
+        .getUserData()
         .then((snap) {
       setState(() {
         groups = snap;
@@ -106,6 +107,20 @@ class _HomePageState extends State<HomePage> {
               leading: const Icon(Icons.group),
               title: const Text(
                 "Groups",
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
+            ListTile(
+              onTap: () {
+                nextScreen(context, const PeoplePage());
+              },
+              selectedColor: Colors.teal,
+              selected: false,
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+              leading: const Icon(Icons.chat_bubble_outline_rounded),
+              title: const Text(
+                "Chats",
                 style: TextStyle(color: Colors.black),
               ),
             ),
@@ -334,7 +349,8 @@ class _HomePageState extends State<HomePage> {
             height: 15,
           ),
           const Text(
-              "You do not have any groups yet. Tap the add icon to create a group."),
+              "You do not have any groups yet. Tap the add icon to create a group.",
+              textAlign: TextAlign.center),
         ],
       ),
     );
